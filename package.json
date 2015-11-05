@@ -1,0 +1,29 @@
+{
+  "name": "yamvish-c3po",
+  "version": "0.1.0",
+  "description": "resource drivers management with c3po for yamvish",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nomocas/yamvish-c3po.git"
+  },
+  "keywords": [
+    "resource",
+    "driver",
+    "isomorphic",
+    "yamvish",
+    "c3po"
+  ],
+  "author": "Gilles Coomans <gilles.coomans@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/nomocas/yamvish-c3po/issues"
+  },
+  "homepage": "https://github.com/nomocas/yamvish-c3po#readme",
+  "dependencies": {
+    "c3po": "^1.0.1"
+  }
+}
