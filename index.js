@@ -46,8 +46,7 @@
 			map[i] = y.interpolable(map[i]);
 
 		return this.exec(function(context, container) {
-			var self = this,
-				p;
+			var self = this;
 			bindMap(map, this, context, container, before, after, fail);
 			if (before)
 				before.call(self, context, container);
