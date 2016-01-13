@@ -7,27 +7,27 @@
 
 	y.c3po = c3po;
 
-	function bindMap(map, self, context, container, before, after, fail) {
+	function bindMap(map, self, context, before, after, fail) {
 		self._binds = self._binds || [];
 		Object.keys(map).forEach(function(i) {
 			if (map[i].__interpolable__)
-				self._binds.push(map[i].subscribeTo(context, function(type, path, value) {
+				self._binds.push(map[i].subscribeTo(context, function(value, type, path, key) {
 					if (before)
-						before.call(self, context, container);
+						before.call(self, context);
 					context.setAsync(i, c3po.get(value))
 						.then(function(s) {
 							if (after)
-								return after.call(self, context, container);
+								return after.call(self, context);
 						}, function(e) {
 							if (fail)
-								return fail.call(self, context, container, e);
+								return fail.call(self, context, e);
 							throw e;
 						});
 				}));
 		});
 	};
 
-	y.View.prototype.load = y.Template.prototype.load = function() {
+	y.Template.prototype.load = function() {
 		var map = arguments[0],
 			argIndex = 1;
 		if (typeof map === 'string') {
@@ -42,11 +42,11 @@
 			after = arguments[argIndex++],
 			fail = arguments[argIndex++];
 
-		return this.exec(function(context, container) {
+		return this.exec(function(context, node) {
 			var self = this;
-			bindMap(map, this, context, container, before, after, fail);
+			bindMap(map, this, context, before, after, fail);
 			if (before)
-				before.call(self, context, container);
+				before.call(self, context);
 			var pr = [],
 				uri;
 			for (var i in map) {
@@ -55,13 +55,13 @@
 			}
 			return ((pr.length == 1) ? pr[0] : Promise.all(pr)).then(function(s) {
 				if (after)
-					return after.call(self, context, container);
+					return after.call(self, context);
 			}, function(e) {
 				if (fail)
-					return fail.call(self, context, container, e);
+					return fail.call(self, context, e);
 				throw e;
 			});
-		}, true);
+		}, null, true);
 	};
 
 	y.Context.prototype.load = function() {
@@ -83,22 +83,20 @@
 		return this;
 	}
 
-	y.Template.prototype.contentFrom = y.View.prototype.contentFrom = function(uri, before, after, fail) {
+	y.Template.prototype.contentFrom = function(uri, before, after, fail) {
 		uri = y.interpolable(uri);
-		return this.exec(function(context, container) {
+		return this.exec(function(context, node) {
 			var self = this,
 				current, currentURI;
 
-			var applyContent = function(type, path, uri) {
+			var applyContent = function(uri, type, path) {
 				if (currentURI === uri)
 					return;
 				currentURI = uri;
-				// console.log('contentFrom : update content ', uri, context.data.$route);
 
 				if (before)
 					before.call(self, context, container);
 				return c3po.get(uri).then(function(templ) {
-					// console.log('contentFrom : ', uri, ' resolve : ', templ);
 					if (current) {
 						if (current.destroy)
 							current.destroy();
@@ -117,17 +115,6 @@
 						self.innerHTML = templ;
 						current = self.childNodes[0];
 					}
-					if (current._route) {
-						if (container) {
-							container._route = container._route || {
-								subrouters: []
-							};
-							y.router.bindToParentRouter(current, container);
-						} else if (!y.router.bindToParentRouter(current)) // try to bind to parent node that hold a _route entry
-							console.warn('yamvish route has not be attached to parent router. will never fire.');
-					}
-					// console.log('contentFrom : after bind to parent router : ', current._route);
-
 					if (after)
 						return after.call(self, context, container);
 				}, function(e) {
@@ -138,13 +125,12 @@
 			};
 
 			if (uri.__interpolable__) {
-				(this._binds = this._binds ||  []).push(uri.subscribeTo(context, applyContent));
-				return applyContent('set', null, uri.output(context));
+				this.binds = this.binds ||  [];
+				uri.subscribeTo(context, applyContent, this.binds);
+				return applyContent(uri.output(context), 'set');
 			}
-			return applyContent('set', null, uri);
-		}, function(context, descriptor, container) {
-
-		});
+			return applyContent(uri, 'set');
+		}, null, true);
 	};
 
 	module.exports = c3po;
