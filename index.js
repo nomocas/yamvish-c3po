@@ -43,10 +43,9 @@
 			fail = arguments[argIndex++];
 
 		return this.exec(function(context, node) {
-			var self = this;
-			bindMap(map, this, context, before, after, fail);
+			bindMap(map, node, context, before, after, fail);
 			if (before)
-				before.call(self, context);
+				before.call(node, context);
 			var pr = [],
 				uri;
 			for (var i in map) {
@@ -55,10 +54,10 @@
 			}
 			return ((pr.length == 1) ? pr[0] : Promise.all(pr)).then(function(s) {
 				if (after)
-					return after.call(self, context);
+					return after.call(node, context);
 			}, function(e) {
 				if (fail)
-					return fail.call(self, context, e);
+					return fail.call(node, context, e);
 				throw e;
 			});
 		}, null, true);
