@@ -1,6 +1,6 @@
 {
   "name": "yamvish-c3po",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "resource drivers management with c3po for yamvish",
   "main": "index.js",
   "scripts": {
