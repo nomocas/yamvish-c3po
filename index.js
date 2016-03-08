@@ -41,7 +41,8 @@
 
 	y.Context.prototype.load = function() {
 		var map = arguments[0],
-			index = 1;
+			index = 1,
+			self = this;
 		if (typeof map === 'string') {
 			map = {}
 			map[arguments[0]] = arguments[1];
@@ -60,11 +61,11 @@
 
 		loadData(map, this).then(function(s) {
 			if (after)
-				after(self, this);
+				after.call(self, self);
 			return s;
 		}, function(e) {
 			if (fail)
-				fail(self, this, e);
+				fail.call(self, self, e);
 			throw e;
 		});
 		return this;
