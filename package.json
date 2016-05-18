@@ -27,6 +27,6 @@
   },
   "homepage": "https://github.com/nomocas/yamvish-c3po#readme",
   "dependencies": {
-    "c3po": "^1.0.1"
+    "c3po": "^1.2.0"
   }
 }
