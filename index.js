@@ -39,43 +39,46 @@
 		return ((pr.length == 1) ? pr[0] : Promise.all(pr));
 	};
 
-	y.Context.prototype.load = function() {
-		var map = arguments[0],
-			index = 1,
-			self = this;
-		if (typeof map === 'string') {
-			map = {}
-			map[arguments[0]] = arguments[1];
-			index = 2;
-		}
+	y.Context.prototype.loadMap = function(map, opt) {
+		var self = this;
+		opt = opt || {};
 		for (var i in map)
 			map[i] = y.interpolable(map[i]);
-
-		var before = arguments[index++],
-			after = arguments[index++],
-			fail = arguments[index++];
-
-		bindMap(map, this, this, before, after, fail);
-		if (before)
-			before.call(this, this);
+		bindMap(map, this, this, opt.before, opt.after, opt.fail);
+		if (opt.before)
+			opt.before.call(this, this);
 
 		loadData(map, this).then(function(s) {
-			if (after)
-				after.call(self, self);
+			if (opt.after)
+				opt.after.call(self, self);
 			return s;
 		}, function(e) {
-			if (fail)
-				fail.call(self, self, e);
+			if (opt.fail)
+				opt.fail.call(self, self, e);
 			throw e;
 		});
 		return this;
 	};
+	y.Context.prototype.load = function(localPath, request, opt) {
+		var map = {};
+		map[localPath] = y.interpolable(request);
+		return this.loadMap(map, opt);
+	};
 
-	y.Template.prototype.load = function() {
-		var args = arguments;
-		return this.context(function(context) {
-			context.load.apply(context, args);
-		});
+
+	y.Template.prototype.load = function(localPath, request, opt) {
+		var doLoad = function(context) {
+			context.load(localPath, request, opt);
+		};
+		return this.dom(doLoad).firstPass(doLoad); // ommit string output
+	};
+
+
+	y.Template.prototype.loadMap = function(map, opt) {
+		var doLoadMap = function(context) {
+			context.loadMap(map, opt);
+		};
+		return this.dom(doLoadMap).firstPass(doLoadMap);
 	};
 
 	//_____________________________________________ Template. CONTENT FROM
