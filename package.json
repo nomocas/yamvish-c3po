@@ -1,6 +1,6 @@
 {
   "name": "yamvish-c3po",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "resource drivers management with c3po for yamvish",
   "main": "index.js",
   "scripts": {
@@ -27,6 +27,6 @@
   },
   "homepage": "https://github.com/nomocas/yamvish-c3po#readme",
   "dependencies": {
-    "c3po": "^1.0.1"
+    "c3po": "^1.2.0"
   }
 }
