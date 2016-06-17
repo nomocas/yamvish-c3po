@@ -13,7 +13,7 @@
 		self._binds = self._binds || [];
 		Object.keys(map).forEach(function(i) {
 			if (map[i].__interpolable__)
-				self._binds.push(map[i].subscribeTo(context, function(value, type, path, key) {
+				map[i].subscribeTo(context, function(value, type, path, key) {
 					if (before)
 						before.call(self, context);
 					context.setAsync(i, c3po.get(value))
@@ -25,7 +25,7 @@
 								return fail.call(self, context, e);
 							throw e;
 						});
-				}));
+				}, self.binds);
 		});
 	};
 
@@ -34,9 +34,9 @@
 			uri;
 		for (var i in map) {
 			uri = map[i].__interpolable__ ? map[i].output(context) : map[i];
-			pr.push(context.setAsync(i, c3po.get(uri)));
+			pr.push(context.setAsync(i, typeof uri === 'function' ? uri.call(context) : c3po.get(uri)));
 		}
-		return ((pr.length == 1) ? pr[0] : Promise.all(pr));
+		return (pr.length == 1) ? pr[0] : Promise.all(pr);
 	};
 
 	y.Context.prototype.loadMap = function(map, opt) {
@@ -61,7 +61,7 @@
 	};
 	y.Context.prototype.load = function(localPath, request, opt) {
 		var map = {};
-		map[localPath] = y.interpolable(request);
+		map[localPath] = request;
 		return this.loadMap(map, opt);
 	};
 
