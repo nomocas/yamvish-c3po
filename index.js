@@ -21,6 +21,7 @@
 							if (after)
 								return after.call(self, context);
 						}, function(e) {
+							context.set('$error.' + i, e.message);
 							if (fail)
 								return fail.call(self, context, e);
 							throw e;
@@ -32,10 +33,17 @@
 	function loadData(map, context) {
 		var pr = [],
 			uri;
-		for (var i in map) {
+		Object.keys(map).forEach(function(i) {
 			uri = map[i].__interpolable__ ? map[i].output(context) : map[i];
-			pr.push(context.setAsync(i, typeof uri === 'function' ? uri.call(context) : c3po.get(uri)));
-		}
+			pr.push(
+				context.setAsync(i, typeof uri === 'function' ? uri.call(context) : c3po.get(uri))
+				.catch(function(e) {
+					console.log('error : ', '$error.' + i, e.message);
+					context.set('$error.' + i, e.message);
+					throw e;
+				})
+			);
+		});
 		return (pr.length == 1) ? pr[0] : Promise.all(pr);
 	};
 
@@ -55,7 +63,6 @@
 		}, function(e) {
 			if (opt.fail)
 				opt.fail.call(self, self, e);
-			throw e;
 		});
 		return this;
 	};
