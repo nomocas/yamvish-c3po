@@ -16,7 +16,7 @@
 				map[i].subscribeTo(context, function(value, type, path, key) {
 					if (before)
 						before.call(self, context);
-					context.setAsync(i, c3po.get(value))
+					context.setAsync(i, c3po.get(value)
 						.then(function(s) {
 							if (after)
 								return after.call(self, context);
@@ -25,7 +25,8 @@
 							if (fail)
 								return fail.call(self, context, e);
 							throw e;
-						});
+						})
+					);
 				}, self.binds);
 		});
 	};
@@ -56,22 +57,24 @@
 		if (opt.before)
 			opt.before.call(this, this);
 
-		loadData(map, this).then(function(s) {
-			if (opt.after)
-				opt.after.call(self, self);
-			return s;
-		}, function(e) {
-			if (opt.fail)
-				opt.fail.call(self, self, e);
-		});
+		this.waiting(loadData(map, this)
+			.then(function(s) {
+				if (opt.after)
+					opt.after.call(self, self);
+				return s;
+			}, function(e) {
+				if (opt.fail)
+					opt.fail.call(self, self, e);
+				throw e;
+			}));
 		return this;
 	};
+
 	y.Context.prototype.load = function(localPath, request, opt) {
 		var map = {};
 		map[localPath] = request;
 		return this.loadMap(map, opt);
 	};
-
 
 	y.Template.prototype.load = function(localPath, request, opt) {
 		var doLoad = function(context) {
@@ -79,7 +82,6 @@
 		};
 		return this.dom(doLoad).firstPass(doLoad); // ommit string output
 	};
-
 
 	y.Template.prototype.loadMap = function(map, opt) {
 		var doLoadMap = function(context) {
