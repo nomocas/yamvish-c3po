@@ -16,17 +16,15 @@
 				map[i].subscribeTo(context, function(value, type, path, key) {
 					if (before)
 						before.call(self, context);
-					context.setAsync(i, c3po.get(value)
-						.then(function(s) {
-							if (after)
-								return after.call(self, context);
-						}, function(e) {
-							context.set('$error.' + i, e.message);
-							if (fail)
-								return fail.call(self, context, e);
-							throw e;
-						})
-					);
+					context.setAsync(i, c3po.get(value)).then(function(s) {
+						if (after)
+							return after.call(self, context);
+					}, function(e) {
+						context.set('$error.' + i, e.message);
+						if (fail)
+							return fail.call(self, context, e);
+						throw e;
+					});
 				}, self.binds);
 		});
 	};
@@ -162,6 +160,5 @@
 			}
 		});
 	};
-
 	module.exports = c3po;
 })();
